@@ -1,0 +1,37 @@
+!DOCTYPE html
+html lang=fr
+head
+  meta charset=UTF-8
+  meta name=viewport content=width=device-width, initial-scale=1.0
+  titleFeuille de score Yamstitle
+  link rel=stylesheet href=style.css
+head
+body
+  header class=app-header
+    h1🎲 Feuille de score Yamsh1
+    pAjoute les joueurs et notez vos scoresp
+  header
+
+  main class=app-main
+    section class=controls
+      input type=text id=playerNameInput placeholder=Nom du joueur
+      button id=addPlayerBtn+ Ajouter le joueurbutton
+      button id=resetBtn class=reset-btnRéinitialiser la partiebutton
+    section
+
+    section class=table-wrapper
+      div class=table-container
+        table id=scoreTable
+          !-- Généré par JavaScript --
+        table
+      div
+    section
+  main
+
+  footer class=app-footer
+    smallFeuille de score Yams – projet statique, 100% gratuitsmall
+  footer
+
+  script src=script.jsscript
+body
+html

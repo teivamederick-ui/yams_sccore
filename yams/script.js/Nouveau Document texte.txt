@@ -1,0 +1,184 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f7fb;
+  color: #222;
+}
+
+.app-header {
+  text-align: center;
+  padding: 16px 12px;
+  background: linear-gradient(135deg, #4a90e2, #6fb1ff);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.app-header h1 {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+}
+
+.app-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.app-main {
+  padding: 12px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.controls input {
+  flex: 1 1 160px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccd3e0;
+  font-size: 0.95rem;
+}
+
+.controls button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background: #4a90e2;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.15s ease;
+}
+
+.controls button:active {
+  transform: scale(0.97);
+  box-shadow: 0 0 0 rgba(0,0,0,0.1);
+}
+
+.reset-btn {
+  background: #f25f5c;
+}
+
+.reset-btn:hover {
+  background: #e24a47;
+}
+
+.table-wrapper {
+  margin-top: 8px;
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Tableau */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 650px;
+}
+
+th, td {
+  border: 1px solid #e0e4ef;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+th {
+  background: #4a90e2;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+th.player-header {
+  min-width: 90px;
+}
+
+td.category-cell {
+  background: #f0f2f8;
+  font-weight: 600;
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 3;
+}
+
+tr:nth-child(even) td:not(.category-cell) {
+  background: #fafbff;
+}
+
+td input {
+  width: 70px;
+  max-width: 100%;
+  padding: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #ccd3e0;
+}
+
+td input:focus {
+  outline: 2px solid #4a90e2;
+  border-color: #4a90e2;
+}
+
+/* Ligne bonus et total */
+
+tr.bonus-row td {
+  background: #f7fff3;
+}
+
+tr.total-row td {
+  background: #fff7c2;
+  font-weight: 700;
+}
+
+/* Footer */
+
+.app-footer {
+  text-align: center;
+  padding: 10px;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .app-main {
+    padding: 10px 8px 16px;
+  }
+
+  th, td {
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  td input {
+    width: 60px;
+    font-size: 0.85rem;
+  }
+
+  .controls button {
+    flex: 1 1 120px;
+    text-align: center;
+  }
+}

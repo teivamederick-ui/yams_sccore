@@ -1,0 +1,209 @@
+// Configuration des catégories
+const CATEGORIES = [
+  { key: "ones", label: "1" },
+  { key: "twos", label: "2" },
+  { key: "threes", label: "3" },
+  { key: "fours", label: "4" },
+  { key: "fives", label: "5" },
+  { key: "sixes", label: "6" },
+  { key: "bonus", label: "Bonus (≥63)", isBonus: true },
+  { key: "brelan", label: "Brelan" },
+  { key: "carre", label: "Carré" },
+  { key: "full", label: "Full" },
+  { key: "petiteSuite", label: "Petite suite" },
+  { key: "grandeSuite", label: "Grande suite" },
+  { key: "yams", label: "Yams" },
+  { key: "chance", label: "Chance" },
+  { key: "total", label: "TOTAL", isTotal: true }
+];
+
+const STORAGE_KEY = "yamsScoreSheet";
+
+let players = []; // [{name: string, scores: {catKey: number|null}}]
+
+const playerNameInput = document.getElementById("playerNameInput");
+const addPlayerBtn = document.getElementById("addPlayerBtn");
+const resetBtn = document.getElementById("resetBtn");
+const scoreTable = document.getElementById("scoreTable");
+
+// Initialisation
+loadFromStorage();
+renderTable();
+
+// Événements
+addPlayerBtn.addEventListener("click", () => {
+  const name = playerNameInput.value.trim();
+  if (!name) return;
+  addPlayer(name);
+  playerNameInput.value = "";
+});
+
+playerNameInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    addPlayerBtn.click();
+  }
+});
+
+resetBtn.addEventListener("click", () => {
+  if (!confirm("Réinitialiser complètement la partie ?")) return;
+  players = [];
+  saveToStorage();
+  renderTable();
+});
+
+// Fonctions principales
+
+function addPlayer(name) {
+  const scores = {};
+  CATEGORIES.forEach(cat => {
+    if (!cat.isTotal && !cat.isBonus) {
+      scores[cat.key] = null;
+    }
+  });
+  scores["bonus"] = 0;
+  scores["total"] = 0;
+
+  players.push({ name, scores });
+  saveToStorage();
+  renderTable();
+}
+
+function renderTable() {
+  scoreTable.innerHTML = "";
+
+  // En-tête
+  const theadRow = document.createElement("tr");
+  const catTh = document.createElement("th");
+  catTh.textContent = "Catégorie";
+  catTh.classList.add("category-cell");
+  theadRow.appendChild(catTh);
+
+  players.forEach((player, index) => {
+    const th = document.createElement("th");
+    th.textContent = player.name || `Joueur ${index + 1}`;
+    th.classList.add("player-header");
+    theadRow.appendChild(th);
+  });
+
+  scoreTable.appendChild(theadRow);
+
+  // Lignes de catégories
+  CATEGORIES.forEach(cat => {
+    const tr = document.createElement("tr");
+    if (cat.isBonus) tr.classList.add("bonus-row");
+    if (cat.isTotal) tr.classList.add("total-row");
+
+    const catTd = document.createElement("td");
+    catTd.textContent = cat.label;
+    catTd.classList.add("category-cell");
+    tr.appendChild(catTd);
+
+    players.forEach((player, playerIndex) => {
+      const td = document.createElement("td");
+
+      if (cat.isTotal || cat.isBonus) {
+        const span = document.createElement("span");
+        span.textContent = player.scores[cat.key] ?? 0;
+        span.dataset.playerIndex = playerIndex;
+        span.dataset.categoryKey = cat.key;
+        td.appendChild(span);
+      } else {
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = "0";
+        input.inputMode = "numeric";
+        input.value = player.scores[cat.key] ?? "";
+        input.dataset.playerIndex = playerIndex;
+        input.dataset.categoryKey = cat.key;
+
+        input.addEventListener("input", onScoreChange);
+
+        td.appendChild(input);
+      }
+
+      tr.appendChild(td);
+    });
+
+    scoreTable.appendChild(tr);
+  });
+
+  // Recalcule pour être sûr que bonus/total sont cohérents
+  recalcAll();
+}
+
+function onScoreChange(e) {
+  const input = e.target;
+  const playerIndex = parseInt(input.dataset.playerIndex, 10);
+  const categoryKey = input.dataset.categoryKey;
+
+  if (Number.isNaN(playerIndex) || !categoryKey) return;
+
+  const value = input.value === "" ? null : parseInt(input.value, 10);
+  players[playerIndex].scores[categoryKey] = Number.isNaN(value) ? null : value;
+
+  recalcPlayer(playerIndex);
+  saveToStorage();
+  updateBonusAndTotalCells(playerIndex);
+}
+
+function recalcAll() {
+  players.forEach((_, index) => {
+    recalcPlayer(index);
+    updateBonusAndTotalCells(index);
+  });
+}
+
+function recalcPlayer(playerIndex) {
+  const player = players[playerIndex];
+  if (!player) return;
+
+  // Somme partie supérieure (1 à 6)
+  const upperKeys = ["ones", "twos", "threes", "fours", "fives", "sixes"];
+  let upperSum = 0;
+  upperKeys.forEach(key => {
+    const v = player.scores[key];
+    if (typeof v === "number") upperSum += v;
+  });
+
+  // Bonus
+  const bonus = upperSum >= 63 ? 35 : 0;
+  player.scores["bonus"] = bonus;
+
+  // Total
+  let total = upperSum + bonus;
+  const otherKeys = ["brelan", "carre", "full", "petiteSuite", "grandeSuite", "yams", "chance"];
+  otherKeys.forEach(key => {
+    const v = player.scores[key];
+    if (typeof v === "number") total += v;
+  });
+
+  player.scores["total"] = total;
+}
+
+function updateBonusAndTotalCells(playerIndex) {
+  const spans = scoreTable.querySelectorAll(`span[data-player-index="${playerIndex}"]`);
+  spans.forEach(span => {
+    const key = span.dataset.categoryKey;
+    span.textContent = players[playerIndex].scores[key] ?? 0;
+  });
+}
+
+// LocalStorage
+
+function saveToStorage() {
+  const data = { players };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadFromStorage() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    if (data && Array.isArray(data.players)) {
+      players = data.players;
+    }
+  } catch (e) {
+    console.warn("Impossible de charger les données :", e);
+  }
+}
